@@ -8,10 +8,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/SINERGI LOGO - MASTER.png' },
+      { url: '/logo-sinergi.png' },
     ],
     shortcut: '/favicon.svg',
-    apple: '/SINERGI LOGO - MASTER.png',
+    apple: '/logo-sinergi.png',
   },
 }
 

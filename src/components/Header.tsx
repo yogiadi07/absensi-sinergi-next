@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { useRouter, usePathname } from 'next/navigation'
 
 export default function Header() {
@@ -14,25 +14,33 @@ export default function Header() {
 
   useEffect(() => {
     let mounted = true
-    supabaseClient.auth.getSession().then(({ data }) => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    )
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
       setHasSession(!!data.session)
       setUserEmail(data.session?.user?.email ?? null)
     })
-    const { data: sub } = supabaseClient.auth.onAuthStateChange((_e, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setHasSession(!!session)
       setUserEmail(session?.user?.email ?? null)
     })
     return () => {
       mounted = false
-      sub.subscription.unsubscribe()
+      try { sub.subscription.unsubscribe() } catch {}
     }
   }, [])
 
   const onLogout = async () => {
     const ok = typeof window !== 'undefined' ? window.confirm('Yakin ingin keluar dari akun admin?') : true
     if (!ok) return
-    await supabaseClient.auth.signOut()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    )
+    await supabase.auth.signOut()
     router.push('/')
   }
 
