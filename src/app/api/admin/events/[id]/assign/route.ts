@@ -13,8 +13,9 @@ const UnassignSchema = z.object({
   seat_number: z.number().int().positive(),
 })
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, context: any) {
   try {
+    const { params } = (context || {}) as { params: { id: string } }
     const eventId = params.id
     const body = AssignSchema.parse(await req.json())
 
@@ -67,8 +68,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: any) {
   try {
+    const { params } = (context || {}) as { params: { id: string } }
     const eventId = params.id
     const body = UnassignSchema.parse(await req.json())
 
