@@ -26,8 +26,19 @@ function ensureAdmin(): SupabaseClient {
 // Export a proxy so existing code can keep calling supabaseAdmin.from(...)
 export const supabaseAdmin: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_target, prop, receiver) {
-    const client = ensureAdmin()
-    const value = (client as any)[prop]
-    return typeof value === 'function' ? value.bind(client) : value
+    // Defer client creation until the returned member is actually invoked.
+    return new Proxy(function () {}, {
+      apply(_t, _thisArg, argArray) {
+        const client = ensureAdmin()
+        const fn = (client as any)[prop]
+        if (typeof fn !== 'function') return fn
+        return fn.apply(client, argArray)
+      },
+      get(_t, childProp) {
+        const client = ensureAdmin()
+        const value = (client as any)[prop]?.[childProp as any]
+        return typeof value === 'function' ? value.bind((client as any)[prop]) : value
+      },
+    }) as any
   },
 })
