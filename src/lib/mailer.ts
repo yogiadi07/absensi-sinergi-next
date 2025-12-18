@@ -27,7 +27,7 @@ export async function sendEmail(params: {
   subject: string
   html?: string
   text?: string
-  attachments?: { filename: string; content: Buffer; contentType?: string; cid?: string; contentDisposition?: string }[]
+  attachments?: { filename: string; content: Buffer; contentType?: string; cid?: string; contentDisposition?: 'attachment' | 'inline' }[]
 }) {
   const fromName = process.env.MAIL_FROM_NAME || 'Absensi Sinergi'
   const from = `${fromName} <${process.env.GMAIL_USER}>`
