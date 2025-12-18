@@ -10,8 +10,9 @@ const PatchSchema = z.object({
   gender: z.enum(['L', 'P']).nullable().optional(),
 })
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string; pid: string } }) {
+export async function PATCH(req: NextRequest, context: any) {
   try {
+    const { params } = (context || {}) as { params: { id: string; pid: string } }
     const eventId = params.id
     const pid = params.pid
     const body = PatchSchema.parse(await req.json())
@@ -47,8 +48,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string; pid: string } }) {
+export async function DELETE(_req: NextRequest, context: any) {
   try {
+    const { params } = (context || {}) as { params: { id: string; pid: string } }
     const eventId = params.id
     const pid = params.pid
 
