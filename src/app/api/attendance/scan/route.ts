@@ -78,6 +78,12 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
     if (seatErr) throw seatErr
 
+    const seatInfo = (() => {
+      const seat = (seatAssign as any)?.seat
+      if (Array.isArray(seat)) return seat[0] ?? null
+      return seat ?? null
+    })()
+
     // 4) Insert attendance log (allow multiple)
     const { error: insertErr } = await supabaseAdmin
       .from('attendance_logs')
@@ -97,8 +103,8 @@ export async function POST(req: NextRequest) {
       data: {
         participant_name: participant!.full_name,
         event_id: resolvedEventId!,
-        table_number: seatAssign?.seat?.table_number ?? null,
-        seat_number: seatAssign?.seat?.seat_number ?? null,
+        table_number: seatInfo?.table_number ?? null,
+        seat_number: seatInfo?.seat_number ?? null,
         total_scans: countData?.length ?? undefined,
       },
     })
