@@ -14,10 +14,14 @@ export default function Header() {
 
   useEffect(() => {
     let mounted = true
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anon) {
+      console.error('Env Supabase tidak tersedia di client. Pastikan NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY di-set di Vercel.');
+      setHasSession(false)
+      return () => { mounted = false }
+    }
+    const supabase = createClient(url, anon)
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
       setHasSession(!!data.session)
@@ -36,10 +40,10 @@ export default function Header() {
   const onLogout = async () => {
     const ok = typeof window !== 'undefined' ? window.confirm('Yakin ingin keluar dari akun admin?') : true
     if (!ok) return
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anon) return
+    const supabase = createClient(url, anon)
     await supabase.auth.signOut()
     router.push('/')
   }

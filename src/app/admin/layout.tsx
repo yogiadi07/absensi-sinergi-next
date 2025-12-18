@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { supabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -16,7 +16,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     let mounted = true
     const run = async () => {
       try {
-        const { data } = await supabaseClient.auth.getSession()
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined
+        if (!url || !anon) {
+          console.error('Env Supabase (NEXT_PUBLIC_*) tidak tersedia. Pastikan sudah di-set di Vercel dan telah redeploy.')
+          if (pathname !== '/admin/login') router.replace('/admin/login')
+          return
+        }
+        const supabase = createClient(url, anon)
+        const { data } = await supabase.auth.getSession()
         if (!mounted) return
         const has = !!data.session
         setAuthed(has)
@@ -29,12 +37,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
     run()
-    const { data: sub } = supabaseClient.auth.onAuthStateChange((_e, session) => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anon) return () => { mounted = false }
+    const supabase = createClient(url, anon)
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session)
       if (!session && pathname !== '/admin/login') router.replace('/admin/login')
       if (session && pathname === '/admin/login') router.replace('/admin/events')
     })
-    return () => { sub.subscription.unsubscribe(); mounted = false }
+    return () => { try { sub.subscription.unsubscribe() } catch {}; mounted = false }
   }, [pathname, router])
 
   // For /admin/login: render children directly (global Header + root main already active)

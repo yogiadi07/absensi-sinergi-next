@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { supabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
 export default function AdminRegisterPage() {
@@ -18,7 +18,11 @@ export default function AdminRegisterPage() {
     setMessage(null)
     setLoading(true)
     try {
-      const { data, error } = await supabaseClient.auth.signUp({ email, password })
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+      )
+      const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) throw error
 
       const userId = data.user?.id

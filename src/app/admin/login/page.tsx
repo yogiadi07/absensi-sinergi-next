@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
@@ -13,7 +13,11 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    supabaseClient.auth.getSession().then(({ data }) => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    )
+    supabase.auth.getSession().then(({ data }) => {
       if (data.session) router.replace('/admin')
     })
   }, [router])
@@ -22,7 +26,11 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password })
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    )
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (error) {
       setError(error.message)

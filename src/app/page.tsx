@@ -1,18 +1,26 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 
 export default function HomePage() {
   const [hasSession, setHasSession] = useState<boolean | null>(null)
 
   useEffect(() => {
     let mounted = true
-    supabaseClient.auth.getSession().then(({ data }) => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anon) {
+      console.error('Env Supabase (NEXT_PUBLIC_*) tidak tersedia di client. Menyembunyikan tombol admin.');
+      setHasSession(false)
+      return () => { mounted = false }
+    }
+    const supabase = createClient(url, anon)
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
       setHasSession(!!data.session)
     })
-    const { data: sub } = supabaseClient.auth.onAuthStateChange((_e, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setHasSession(!!session)
     })
     return () => {
