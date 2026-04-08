@@ -20,6 +20,12 @@ Dokumentasi ini menjelaskan struktur file dan folder dalam aplikasi Absensi Sine
   Halaman untuk scan QR code peserta. Menggunakan kamera untuk validasi kehadiran.
 
 ### Halaman Admin
+- **`src/app/admin/login/page.tsx`**  
+  Halaman login admin. Form untuk masuk dengan email dan password via Supabase Auth.
+
+- **`src/app/admin/register/page.tsx`**  
+  Halaman registrasi admin baru (jika diperlukan).
+
 - **`src/app/admin/page.tsx`**  
   Dashboard admin untuk mengelola events, participants, dan pengaturan.
 
@@ -107,6 +113,10 @@ Dokumentasi ini menjelaskan struktur file dan folder dalam aplikasi Absensi Sine
 ## Database Schema
 - **`supabase/schema.sql`**  
   Schema database Supabase (tables: events, participants, attendance, dll.).
+
+## Backend Proteksi & Middleware
+- **`middleware.ts`** (di root project)  
+  Middleware server-side untuk proteksi routes admin. Cek cookie Supabase auth sebelum akses `/admin/*` dan `/api/admin/*`. Redirect ke login jika belum authenticated.
 
 ## Catatan Penggunaan
 - **Routing**: Menggunakan Next.js App Router, jadi setiap folder di `src/app/` adalah route.
