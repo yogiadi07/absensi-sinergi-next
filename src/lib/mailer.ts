@@ -3,7 +3,9 @@ import nodemailer from 'nodemailer'
 // Create a singleton transporter using Gmail SMTP
 // Requires environment variables:
 // - GMAIL_USER: your Gmail address
-// - GMAIL_PASS: app password (recommended) or OAuth2 (not implemented here)
+// - GMAIL_CLIENT_ID: from Google Cloud
+// - GMAIL_CLIENT_SECRET: from Google Cloud
+// - GMAIL_REFRESH_TOKEN: from Google Cloud
 // - MAIL_FROM_NAME: optional display name
 
 let transporter: nodemailer.Transporter | null = null
@@ -11,13 +13,22 @@ let transporter: nodemailer.Transporter | null = null
 export function getMailer() {
   if (transporter) return transporter
   const user = process.env.GMAIL_USER
-  const pass = process.env.GMAIL_PASS
-  if (!user || !pass) {
-    throw new Error('Missing GMAIL_USER/GMAIL_PASS in environment')
+  const clientId = process.env.GMAIL_CLIENT_ID
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN
+  
+  if (!user || !clientId || !clientSecret || !refreshToken) {
+    throw new Error('Missing Gmail OAuth2 credentials in environment')
   }
   transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user, pass },
+    auth: { 
+      type: 'OAuth2',
+      user: user,
+      clientId: clientId,
+      clientSecret: clientSecret,
+      refreshToken: refreshToken
+    },
     tls: {
       rejectUnauthorized: false
     },
